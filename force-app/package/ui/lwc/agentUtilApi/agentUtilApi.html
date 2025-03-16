@@ -1,0 +1,305 @@
+<template>
+    
+    <!-- SPINNER -->
+    <lightning-spinner 
+        lwc:if          = {loading}
+        alternative-text= "Loading" 
+        size            = "medium"
+        variant         = "base"
+        class           = "slds-is-fixed"
+    ></lightning-spinner>
+
+    <!-- MAIN CARD -->
+    <div class="slds-grid slds-gutters">
+        
+        <!-- LEFT COLUMN -->
+        <div class="slds-col slds-col slds-size_1-of-3">
+            <lightning-card title="Agent Util - Api - Config" icon-name="standard:maintenance_plan">
+                <lightning-tabset>
+                    
+                    <!-- CONNECT -->
+                    <lightning-tab label="Connect" value="connect">
+                        <div class="slds-var-p-around_small">
+
+                            <!-- CONNECTION -->
+                            <fieldset class="slds-box">
+                                <legend class="legend">Connection</legend>
+
+                                <lightning-combobox
+                                    disabled         = {connectionInputDisabled}
+                                    name             = "Named Credential"
+                                    label            = "Named Credential"
+                                    value            = {ncName}
+                                    placeholder      = "Select..."
+                                    options          = {ncOptions}
+                                    onchange         = {handleChangeNcName}
+                                    variant          = "label-inline"
+                                    field-level-help = "The Agent Api Named Credential"
+                                ></lightning-combobox>
+
+                                <lightning-combobox
+                                    disabled    = {connectionInputDisabled}
+                                    name        = "agentId"
+                                    label       = "Agent Id"
+                                    value       = {agentId}
+                                    placeholder = "Select..."
+                                    options     = {agentOptions}
+                                    onchange    = {handleChangeAgentId}
+                                    variant     = "label-inline"
+                                ></lightning-combobox>
+
+                            </fieldset>
+
+                            <!-- SESSION INFO -->
+                            <fieldset class="slds-box slds-m-top_medium">
+                                <legend class="legend">Message Session Info</legend>
+                                
+                                <lightning-input
+                                    name             = "bypassUser" 
+                                    type             = "checkbox"
+                                    label            = "Bypass User"
+                                    value            = {bypassUser}   
+                                    checked          = {bypassUser}   
+                                    disabled         = {startSessionDisabled}
+                                    variant          = "label-inline"
+                                    onchange         = {handleChangeBypassUser}
+                                    field-level-help = "Indicates whether to use the agent-assigned user instead of the logged in user. Defaults to false. Current guidance is to set this to true."
+                                ></lightning-input>
+                            
+                            <lightning-input type="text" label="My Domain Url"   value={baseUrl}   disabled="true"                                              variant="label-inline"></lightning-input>
+                            <lightning-input type="text" label="Agent Id"        value={agentId}   disabled={overrideDisabled} onchange={handleChangeAgentId}   variant="label-inline"></lightning-input>
+                            <lightning-input type="text" label="Session Id"      value={sessionId} disabled={overrideDisabled} onchange={handleChangeSessionId} variant="label-inline"></lightning-input>
+                            <lightning-input type="text" label="Sequence"        value={sequence}  disabled={overrideDisabled} onchange={handleChangeSequence}  variant="label-inline"></lightning-input>
+
+                            <lightning-button-group class="slds-m-bottom_small">
+                                <lightning-button name="startSession" label="Start Session"         onclick={handleClickStartSession} variant="brand" disabled={startSessionDisabled}></lightning-button>
+                                <lightning-button name="endSession"   label="End Session"           onclick={handleClickEndSession}   variant="brand" disabled={endSessionDisabled}></lightning-button>
+                                <lightning-button name="override"     label={overrideButtonLabel}   onclick={handleClickOverride}     variant="brand" disabled={endSessionDisabled}></lightning-button>
+                                <lightning-button name="editAgent"    label="Edit Agent"            onclick={handleClickEditAgent}    variant="brand" disabled={startSessionDisabled}></lightning-button>
+                            </lightning-button-group>
+
+                            </fieldset>
+
+                        </div>
+                    </lightning-tab>
+                    
+                    <!-- COMMUNICATE -->
+                    <lightning-tab label="Communicate" value="communicate">
+                        <div class="slds-var-p-around_small">
+                            <!-- SEND MESSAGE -->
+                            <fieldset class="slds-box">
+                                <legend class="legend">Send Message</legend>
+                                
+                                <!-- HERE FOR FUTURE PURPOSES (CURRENTLY BROKEN)
+                                <lightning-combobox
+                                    name             = "messageType"
+                                    label            = "Message Type"
+                                    value            = {messageType}
+                                    options          = {messageTypeOptions}
+                                    onchange         = {handleChangeMessageType}
+                                    disabled         = {sendMessageInputDisabled}
+                                    variant          = "label-inline"
+                                    field-level-help = "Request message type"
+                                ></lightning-combobox>
+                                -->
+
+                                <lightning-input 
+                                    type             = "text" 
+                                    value            = {inReplyToMessageId} 
+                                    onchange         = {handleChangeInReplyToMessageId} 
+                                    label            = "In Reply To Message Id" 
+                                    disabled         = {sendMessageInputDisabled}
+                                    variant          = "label-inline"
+                                    field-level-help = "Message ID of the previous response you are replying to (Optional)"
+                                ></lightning-input>
+
+                                <lightning-textarea 
+                                    type             = "text" 
+                                    value            = {message} 
+                                    onchange         = {handleChangeMessage} 
+                                    label            = "Message" 
+                                    disabled         = {sendMessageInputDisabled}
+                                    variant          = "label-inline"
+                                    field-level-help ="Text reply to the agent"
+                                ></lightning-textarea>
+                                
+                                <lightning-button 
+                                    name     = "sendMessage" 
+                                    label    = "Send Message" 
+                                    onclick  = {handleClickSendMessage}  
+                                    disabled = {sendMessageInputDisabled}
+                                    class    = "slds-m-bottom_small"
+                                    variant  = "brand"
+                                ></lightning-button>
+
+                            </fieldset>
+
+                            <!-- SUBMIT FEEDBACK -->
+                            <fieldset class="slds-box slds-m-top_medium">
+                                <legend class="legend">Submit Feedback</legend>
+
+                                <lightning-combobox
+                                    name        = "feedback"
+                                    label       = "Feedback"
+                                    value       = {feedback}
+                                    placeholder = "Select..."
+                                    options     = {feedbackOptions}
+                                    onchange    = {handleChangeFeedback}
+                                    disabled    = {submitFeedbackInputDisabled}
+                                    variant     = "label-inline"
+                                ></lightning-combobox>
+                                
+                                <lightning-input 
+                                    type             = "text" 
+                                    label            = "Feedback Id" 
+                                    value            = {feedbackId} 
+                                    onchange         = {handleChangeFeedbackId} 
+                                    disabled         = {submitFeedbackInputDisabled}
+                                    variant          = "label-inline"
+                                    field-level-help="Unique ID to identify the generation. Used to submit feedback"
+                                ></lightning-input>
+
+                                <lightning-input 
+                                    type             = "text" 
+                                    label            = "Feedback Text" 
+                                    value            = {feedbackText} 
+                                    onchange         = {handleChangeFeedbackText} 
+                                    disabled         = {submitFeedbackInputDisabled}
+                                    variant          = "label-inline"
+                                    field-level-help ="Textual representation of user feedback"
+                                ></lightning-input>
+
+                                <lightning-button 
+                                    name     = "submitFeedback" 
+                                    label    = "Submit Feedback" 
+                                    onclick  = {handleClickSubmitFeedback} 
+                                    disabled = {submitFeedbackInputDisabled}
+                                    class    = "slds-m-bottom_small"
+                                    variant  = "brand"
+                                ></lightning-button>
+                                
+                            </fieldset>
+                        </div>
+                    </lightning-tab>
+
+
+                    <!-- TEST CONNECTION -->
+                    <lightning-tab label="Debug" value="debug">
+                        <div class="slds-var-p-around_small">
+
+                            <!-- TEST CONNECTION -->
+                            <fieldset class="slds-box">
+                                <legend class="legend">Test Connection</legend>
+                                <lightning-input
+                                    type="text"
+                                    label="Selected Agent Api"
+                                    disabled="true"
+                                    value={ncName}
+                                    variant="label-inline"
+                                ></lightning-input>
+                               
+                            
+                                <lightning-button-group class="slds-m-top_small">
+                                    <lightning-button 
+                                        label="Test Agent Api" 
+                                        onclick={handleClickTestAgentApi}
+                                        variant = "brand"
+                                        icon-name="utility:agent_astro"
+                                        disabled= {debugActionsDisabled}
+                                    ></lightning-button>
+        
+                                    <lightning-button 
+                                        label="Test Salesforce Api" 
+                                        onclick={handleClickTestSalesforceApi}
+                                        variant = "brand"
+                                        icon-name="utility:salesforce1"
+                                        disabled= {debugActionsDisabled}
+                                    ></lightning-button>
+
+                                    <lightning-button 
+                                        label="Test Metadata Api" 
+                                        onclick={handleClickTestMetadataApi}
+                                        variant = "brand"
+                                        icon-name="utility:insert_tag_field"
+                                        disabled= {debugActionsDisabled}
+                                    ></lightning-button>
+
+                                </lightning-button-group>
+
+                                <div class="slds-box slds-m-top_small" style="overflow-x:hidden !important; white-space: pre-wrap !important; font-family:monospace;" lwc:if={debugApiCalled}>
+                                    {apiResponse}
+                                </div>
+                            </fieldset>
+
+                            <fieldset class="slds-box slds-m-top_small">
+                                <legend class="legend">Refresh Access Token</legend>
+
+                                <lightning-button-group class="slds-m-top_small">
+                                    
+        
+                                    <lightning-button 
+                                        label="Refresh Agent Api Token" 
+                                        onclick={handleRefreshAgentApiToken}
+                                        variant = "brand-outline"
+                                        icon-name="utility:agent_astro"
+                                        disabled= {debugActionsDisabled}
+                                        
+                                    ></lightning-button>
+
+                                    <lightning-button 
+                                        label="Refresh Salesforce Api Token" 
+                                        onclick={handleRefreshSalesforceApiToken}
+                                        variant = "brand-outline"
+                                        icon-name="utility:salesforce1"
+                                        disabled= {debugActionsDisabled}
+                                    ></lightning-button>
+                                    </lightning-button-group>
+                            </fieldset>
+                        </div>
+                    </lightning-tab>
+                </lightning-tabset>
+            </lightning-card>
+        </div>
+
+        <!-- RIGHT COLUMN -->
+        <div class="slds-col slds-col slds-size_2-of-3">
+            <lightning-card title="Agent Util - Api - Request Response" icon-name="standard:bot">
+                <lightning-tabset active-tab-value="response">
+                    
+                    <lightning-tab label="Request"  value="request" >
+                        <div class="slds-var-p-around_small">
+                            <pre class="slds-box">{requestBody}</pre>
+                        </div>
+                    </lightning-tab>
+                    
+                    <lightning-tab label="Response" value="response">
+                        <div class="slds-var-p-around_small">
+                            Http Status Code: <b>{responseStatusCode}</b>
+                            <pre class="slds-box">{responseBody}</pre>
+                        </div>
+                    </lightning-tab>
+
+                    <!-- FORMATTED RESPONSE -->
+                    <lightning-tab label="Formatted Response" value="formattedResponse">
+                        <div class="slds-var-p-around_small">
+                            
+                            <!-- LAST MESSAGE -->
+                            <fieldset class="slds-box">
+                                <legend class="legend">Last Message</legend>
+                                <lightning-formatted-text value={lastMessage} linkify ></lightning-formatted-text>
+                            </fieldset>
+                            
+                            <!-- FORMATTED RESPONSE -->
+                            <fieldset class="slds-box slds-var-m-top_small">
+                                <legend class="legend">Last Response</legend>
+                                <lightning-formatted-text value={richTextBody} linkify ></lightning-formatted-text>
+                            </fieldset>
+                            
+                        </div>
+                    </lightning-tab>
+                </lightning-tabset>
+            </lightning-card>
+        </div>
+
+    </div>
+</template>

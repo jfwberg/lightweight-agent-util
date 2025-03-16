@@ -1,0 +1,16 @@
+.setupButton{
+    width: 400px !important;
+}
+
+.info-box{
+    border: 1px solid #f8e38e !important;
+    background-color: #ffffdc;
+}
+
+.legend{
+    font-weight: bold;
+}
+
+.box-padding{
+    margin-top: 20px !important;
+}

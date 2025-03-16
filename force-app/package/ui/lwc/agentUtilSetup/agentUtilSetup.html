@@ -1,0 +1,472 @@
+<template>
+
+    <!-- SPINNER -->
+    <lightning-spinner
+        lwc:if          = {loading}
+        alternative-text= "Loading"
+        size            = "medium"
+        variant         = "base"
+        class           = "slds-is-fixed"
+    ></lightning-spinner>
+
+
+    <!-- MAIN CARD -->
+    <lightning-card title="Agent Util - Setup" icon-name="standard:prompt_builder">
+        <div class="slds-card__body">
+            <lightning-tabset active-tab-value="configure">
+
+                <!-- CONFIGURE TAB -->
+                <lightning-tab label="Configure" value="configure" >
+                    <div class="slds-var-p-around_small">
+
+                        <!-- CONFIGURATION -->
+                        <fieldset class="slds-box">
+                            <legend class="legend">Configuration</legend>
+
+                            <lightning-input
+                                name="name"
+                                value={appName}
+                                label="Api Name"
+                                onchange={handleChangeName}
+                                field-level-help="The Api name for all the metadata that will be created"
+                                variant="label-inline"
+                            ></lightning-input>
+
+                            <lightning-input
+                                name="label"
+                                value={appLabel}
+                                label="Label"
+                                onchange={handleChangeLabel}
+                                field-level-help="The Api label for all the metadata that will be created"
+                                variant="label-inline"
+                            ></lightning-input>
+
+                            <lightning-input
+                                type     ="checkbox"
+                                label    ="Allow Debug Endpoint"
+                                value    ={allowDebug}
+                                checked  ={allowDebug}
+                                onchange ={handleChangeAllowDebug}
+                                field-level-help="When checked a Named Credential to the Debug Endpoint will be created. Disabled in production (like) environments"
+                                variant  ="label-inline"
+                            ></lightning-input>
+
+                            <lightning-record-picker
+                                label           = "Integration User"
+                                object-api-name = "User"
+                                value           = {connectedAppIntegrationUser}
+                                field-level-help= "The Integration User on this org (Sfdc Api) that is granted access to the Connected App through a Permission Set."
+                                onchange        = {handleChangeConnectedAppIntegrationUser}
+                            ></lightning-record-picker>
+
+                        </fieldset>
+                    </div>
+                </lightning-tab>
+
+                <!-- EXPOSE TAB -->
+                <lightning-tab label="Expose" value="expose" >
+                    <div class="slds-var-p-around_small">
+                        <!-- UPSERT CONNECTED APP -->
+                        <fieldset class="slds-box">
+                            <legend class="legend">Connected App</legend>
+
+                            <lightning-button
+                                label   = "Upsert Connected App"
+                                onclick = {handleClickUpsertConnectedApp}
+                                variant = "brand"
+                                icon-name="utility:connected_apps"
+                            ></lightning-button>
+
+                            <div class="slds-m-top_small" lwc:if = {connectedAppCreated}>
+                                <lightning-datatable
+                                    key-field            = "fullName"
+                                    data                 = {caData}
+                                    columns              = {columns}
+                                    hide-checkbox-column = "true">
+                                </lightning-datatable>
+                            </div>
+                        </fieldset>
+
+                        <!-- AGENT API CONNECTED APP POLICY LINK-->
+                        <fieldset class="slds-box slds-m-top_medium">
+                            <legend class="legend">Agent Api Connected App Policy</legend>
+                            <div class="slds-box info-box slds-m-bottom_small">You need to check the <b>Issue JSON Web Token (JWT)-based access tokens</b> at the bottom of the edit policy page for the <b>Agent Api Connected App</b></div>
+
+                            <lightning-button
+                                label="Generate Edit Agent Api Connected App Policy Link"
+                                onclick={handleClickEditConnectedAppPolicy}
+                                variant = "brand"
+                                icon-name="utility:policy"
+                            ></lightning-button>
+
+                            <div class="slds-box slds-m-top_small" style="word-break: break-all;" lwc:if={policyLinkCreated}>
+                                <a href={editPolicyUrl} target="_blank">{editPolicyUrl}</a>
+                            </div>
+                        </fieldset>
+                    </div>
+                </lightning-tab>
+
+                <!-- CONNECT TAB -->
+                <lightning-tab label="Connect" value="connect">
+                    <div class="slds-var-p-around_small">
+                        <!-- NAMED CREDENTIAL -->
+                        <fieldset class="slds-box">
+                            <legend class="legend">Named / External Credentials</legend>
+                            
+                            <lightning-button 
+                                label   ="Upsert Named/External Credential" 
+                                onclick ={handleClickNamedExternalCredential}
+                                variant = "brand"
+                                icon-name="utility:shield"
+                            ></lightning-button>
+
+                            <div class="slds-m-top_medium" lwc:if={namedCredentialCreated}>
+                                <lightning-datatable
+                                    key-field            = "fullName"
+                                    data                 = {ncData}
+                                    columns              = {columns}
+                                    hide-checkbox-column = "true">
+                                </lightning-datatable>
+                            </div>
+                        </fieldset>
+
+                        <!-- VALIDATE HEADERS -->
+                        <fieldset class="slds-box slds-m-top_medium">
+                            <legend class="legend">Validate Agent Api Authorization Header</legend>
+
+                            <lightning-button-group>
+                                <lightning-button 
+                                    label="Validate Agent Api Header" 
+                                    onclick={handleClickValidateAuthorizationHeaderAaApi}
+                                    variant = "brand"
+                                    icon-name="utility:agent_astro"
+                                ></lightning-button>
+
+                                <lightning-button 
+                                    label="Validate Salesforce Api Header" 
+                                    onclick={handleClickValidateAuthorizationHeaderSfApi}
+                                    variant = "brand"
+                                    icon-name="utility:salesforce1"
+                                ></lightning-button>
+                            </lightning-button-group>
+                                
+                            <div class="slds-box slds-m-top_small" style="word-break: break-all;" lwc:if={debugApiCalled}>
+                                <pre>{apiResponse}</pre>
+                            </div>
+                        </fieldset>
+                    </div>
+                </lightning-tab>
+
+                <!-- DEBUG TAB -->
+                <lightning-tab label="Debug" value="debug">
+                    <div class="slds-var-p-around_small">
+                         <!-- REFRESH NAMED PRINCIPAL -->
+                         <fieldset class="slds-box">
+                            <legend class="legend">Refresh Named Principal (Auth Header Error)</legend>
+                            
+                            <lightning-button 
+                                label   = "Refresh Named Principal" 
+                                onclick = {handleClickRefreshNamedPrincipal}
+                                variant = "destructive"
+                            ></lightning-button>
+                            
+                            <div class="slds-m-top_medium" lwc:if={namedPrincipalRefreshed}>
+                                <lightning-datatable
+                                    key-field            = "fullName"
+                                    data                 = {npData}
+                                    columns              = {columns}
+                                    hide-checkbox-column = "true"
+                                    class                = "slds-m-top_small"
+                                ></lightning-datatable>
+                            </div>
+                        </fieldset>
+                    </div>
+                </lightning-tab>
+
+                <!-- UPDATE METADATA TAB -->
+                <lightning-tab label="Update" value="update" >
+                    <div class="slds-var-p-around_small">
+
+                        <!-- CONFIGURATION -->
+                        <fieldset class="slds-box slds-m-bottom_small">
+                            <legend class="legend">Configuration</legend>
+
+                            <lightning-input
+                                name="name"
+                                value={appName}
+                                label="Selected Agent Api"
+                                variant="label-inline"
+                                field-level-help="The Api name for all the metadata that will be updated"
+                                disabled
+                            ></lightning-input>
+
+                            <lightning-button
+                                name="selConfig"
+                                label="Select Configuration"
+                                onclick={handleClickSelectConfiguration}
+                                disabled={configurationInputDisabled}
+                                variant="brand"
+                            ></lightning-button>
+
+                        </fieldset>
+
+                        <!-- UPDATE METADATA TABSET -->
+                        <lightning-tabset active-tab-value="namedCredential">
+
+                            <!-- NAMED CREDENTIAL TAB -->
+                            <lightning-tab label="Named Credential" value="namedCredential" >
+
+                                <!-- NAMED CREDENTIAL -->
+                                <fieldset class="slds-box slds-m-top_medium">
+                                    <legend class="legend">Named Credential Settings</legend>
+                                    <div class="slds-box info-box slds-m-bottom_small">Update the <b>Named Credential</b> with the Remote Org's Connected App details if you want to connect <b>this org</b> to a <b>Remote Org</b>. Configure the <b>Signing Certificate</b> <i></i>in the Remote Org's Connected App.</div>
+
+                                    <lightning-input
+                                        type="text"
+                                        label="My Domain URL"
+                                        value={myDomainUrl}
+                                        onchange={handleChangeMyDomainUrl}
+                                        disabled={ncSettingsDisabled}
+                                        variant="label-inline"
+                                    ></lightning-input>
+
+                                    <lightning-input
+                                        type="checkbox"
+                                        label="Is Sandbox"
+                                        value={isSandbox}
+                                        checked={isSandbox}
+                                        onchange={handleChangeIsSandbox}
+                                        disabled={ncSettingsDisabled}
+                                        variant="label-inline"
+                                    ></lightning-input>
+
+                                    <lightning-input
+                                        type="text"
+                                        label="Username"
+                                        value={username}
+                                        onchange={handleChangeUsername}
+                                        disabled={ncSettingsDisabled}
+                                        variant="label-inline"
+                                    ></lightning-input>
+
+                                    <lightning-input
+                                        type="text"
+                                        label="Agent Api Connected App Id"
+                                        value={aaConnectedAppId}
+                                        onchange={handleChangeAaConnectedAppId}
+                                        disabled={ncSettingsDisabled}
+                                        variant="label-inline"
+                                    ></lightning-input>
+
+                                    <lightning-input
+                                        type="text"
+                                        label="Sfdc Api Connected App Id"
+                                        value={hoConnectedAppId}
+                                        onchange={handleChangeHoConnectedAppId}
+                                        disabled={ncSettingsDisabled}
+                                        variant="label-inline"
+                                    ></lightning-input>
+
+                                    <hr/>
+
+                                    <lightning-input
+                                        type             = "text"
+                                        label            = "My Domain Url"
+                                        value            = {orgDomainUrl}
+                                        read-only        = "true"
+                                        variant          = "label-inline"
+                                        field-level-help = "The My Domain URL from THIS Org. Share this url with the Remote Org"
+                                    ></lightning-input>
+
+                                    <lightning-textarea
+                                        type="text"
+                                        label="Signing Certificate"
+                                        value={signingCertificate}
+                                        field-level-help="The certificate that is used by this Org to sign the JWT. Share this certificate with the Remote Org."
+                                        read-only="true"
+                                        disabled = {ncSettingsDisabled}
+                                        variant="label-inline"
+                                    ></lightning-textarea>
+
+                                    <lightning-button-group>
+                                        <lightning-button
+                                            name     = "updateNcMetadata"
+                                            label    = "Update Named Credential"
+                                            onclick  = {handleClickUpdateNcMetadata}
+                                            disabled = {ncSettingsDisabled}
+                                            variant  = "brand"
+                                        ></lightning-button>
+
+                                        <lightning-button
+                                            name     = "copyOrgDomain"
+                                            label    = "Org Domain Name"
+                                            onclick  = {handleClickCopyOrgDomainName}
+                                            disabled = {ncSettingsDisabled}
+                                            variant  = {copyOrgDomainNameVariant}
+                                            icon-name= "utility:copy"
+                                        ></lightning-button>
+
+                                        <lightning-button
+                                            name     = "copyCertificate"
+                                            label    = "Certificate"
+                                            onclick  = {handleClickCopySigningCertificate}
+                                            disabled = {ncSettingsDisabled}
+                                            variant  = {copySigningCertVariant}
+                                            icon-name= "utility:copy"
+                                        ></lightning-button>
+
+                                        <lightning-button
+                                            name     = "downloadCertificate"
+                                            label    = "Certificate"
+                                            onclick  = {handleClickDownloadSigningCertificate}
+                                            disabled = {ncSettingsDisabled}
+                                            variant  = {downloadSigningCertVariant}
+                                            icon-name= "utility:download"
+                                        ></lightning-button>
+                                    </lightning-button-group>
+
+                                    <div class="slds-m-top_small">
+                                        <lightning-datatable
+                                            lwc:if               = {ncUpdated}
+                                            key-field            = "fullName"
+                                            data                 = {ncUpdatedData}
+                                            columns              = {columns}
+                                            hide-checkbox-column = "true"
+                                        ></lightning-datatable>
+                                    </div>
+                                </fieldset>
+                            </lightning-tab>
+
+                            <!-- CONNECTED APP TAB -->
+                            <lightning-tab label="Connected App" value="connectedApp" >
+                                <!-- CONNECTED APP -->
+                                    <fieldset class="slds-box slds-m-top_medium">
+                                        <legend class="legend">Connected App Settings</legend>
+
+                                        <div class="slds-box info-box slds-m-bottom_medium">Update the <b>Connected App</b> with the Remote Org's configuration if you want a <b>Remote Org</b> connect to <b>this Org</b></div>
+                                        <lightning-input
+                                            type="text"
+                                            label="(Remote Org) My Domain Url"
+                                            value={callbackUrl}
+                                            onchange={handleChangeCallbackUrl}
+                                            disabled={caSettingsDisabled}
+                                            variant="label-inline"
+                                        ></lightning-input>
+
+                                        <lightning-textarea
+                                            type="text"
+                                            label="(Remote Org) X.509 Certificate"
+                                            value={certificate}
+                                            onchange={handleChangeCertificate}
+                                            field-level-help="The X.509 certificate PEM formatted certificate as part of the connected app"
+                                            disabled={caSettingsDisabled}
+                                            variant="label-inline"
+                                        ></lightning-textarea>
+
+                                        <hr/> <!-- CONNECTED APP OUTPUTS ONLY -->
+
+                                        <lightning-input
+                                            type             = "text"
+                                            label            = "My Domain Url"
+                                            value            = {orgDomainUrl}
+                                            read-only        = "true"
+                                            variant          = "label-inline"
+                                            field-level-help = "The My Domain URL from THIS Org. Share this url with the Remote Org"
+                                        ></lightning-input>
+
+                                        <lightning-input
+                                            type="text"
+                                            label="Integration Username"
+                                            value={connectedAppUsername}
+                                            read-only=true
+                                            variant="label-inline"
+                                            field-level-help="The Integration User that has access to this Connected App. Share this with the Remote Org."
+                                        ></lightning-input>
+
+                                        <lightning-input
+                                            type="text"
+                                            label="Agent Api Connected App Id"
+                                            value={sfdcApiAaCaId}
+                                            read-only=true
+                                            variant="label-inline"
+                                            field-level-help="The Agent Api Connected App Id. Share this with the Remote Org."
+                                        ></lightning-input>
+
+                                        <lightning-input
+                                            type="text"
+                                            label="Sfdc Api Connected App Id"
+                                            value={sfdcApiHoCaId}
+                                            read-only=true
+                                            variant="label-inline"
+                                            field-level-help="The Sfdc Api Connected App Id. Share this with the Remote Org."
+                                        ></lightning-input>
+
+                                        <lightning-button-group>
+                                            <lightning-button
+                                                name     = "updateCaMetadata"
+                                                label    = "Update Connected Apps"
+                                                onclick  = {handleClickUpdateCaMetadata}
+                                                disabled = {caSettingsDisabled}
+                                                variant  = "brand"
+                                            ></lightning-button>
+
+                                            <lightning-button 
+                                                name="copyMyDomainUrl" 
+                                                label="Domain Url" 
+                                                icon-name="utility:copy" 
+                                                onclick={handleClickCopyMyDomainUrl} 
+                                                disabled = {caSettingsDisabled}
+                                                variant={copyMyDomainUrlVariant}
+                                            ></lightning-button>
+
+                                            <lightning-button 
+                                                name="copyConAppUsername" 
+                                                label="Username" 
+                                                icon-name="utility:copy" 
+                                                onclick={handleClickCopyConAppUsername} 
+                                                disabled = {caSettingsDisabled}
+                                                variant={copyConAppUsernameVariant}
+                                            ></lightning-button>
+
+                                            <lightning-button 
+                                                name="copyAaConAppId" 
+                                                label="Agent Api" 
+                                                icon-name="utility:copy" 
+                                                onclick={handleClickCopyAaConAppId} 
+                                                disabled = {caSettingsDisabled}
+                                                variant={copyAaConAppIdVariant}
+                                            ></lightning-button>
+
+                                            <lightning-button 
+                                                name      = "copyHoConAppId" 
+                                                label     = "Sfdc Api"  
+                                                icon-name = "utility:copy" 
+                                                onclick   = {handleClickCopyHoConAppId}
+                                                disabled  = {caSettingsDisabled} 
+                                                variant   = {copyHoConAppIdVariant}
+                                            ></lightning-button>
+                                        </lightning-button-group>
+
+                                        <div class="slds-m-top_small">
+                                            <lightning-datatable
+                                                lwc:if               = {caUpdated}
+                                                key-field            = "fullName"
+                                                data                 = {caUpdatedData}
+                                                columns              = {columns}
+                                                hide-checkbox-column = "true">
+                                            </lightning-datatable>
+                                        </div>
+
+                                    </fieldset>
+                            </lightning-tab>
+                                
+                        </lightning-tabset>
+
+                    </div>
+                </lightning-tab>
+
+            </lightning-tabset>
+        </div>
+    </lightning-card>
+
+</template>

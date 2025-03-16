@@ -1,0 +1,43 @@
+{
+  "packageDirectories": [
+    {
+      "versionName": "v63.0 - 0.4",
+      "versionNumber": "0.4.0.NEXT",
+      "path": "force-app/package",
+      "default": true,
+      "package": "Lightweight - Agent Util",
+      "versionDescription": "A lightweight set of tools for the Salesforce Agent (Agentforce) API.",
+      "ancestorVersion": "HIGHEST",
+      "dependencies": [
+        {
+          "package": "Lightweight - Apex SOAP Util@0.3.0-1"
+        }
+      ]
+    },
+    {
+      "versionName": "v63.0 - 0.4",
+      "versionNumber": "0.4.0.NEXT",
+      "path": "force-app/package",
+      "default": false,
+      "package": "Lightweight - Agent Util (Unlocked)",
+      "versionDescription": "A lightweight set of tools for the Salesforce Agent (Agentforce) API.",
+      "dependencies": [
+        {
+          "package": "Lightweight - Apex SOAP Util (Unlocked)@0.3.0-1"
+        }
+      ]
+    }
+  ],
+  "name": "lightweight-agent-util",
+  "namespace": "agentforce1",
+  "sfdcLoginUrl": "https://login.salesforce.com",
+  "sourceApiVersion": "63.0",
+  "packageAliases": {
+    "Lightweight - Apex SOAP Util@0.3.0-1": "04tP30000014Ev3IAE",
+    "Lightweight - Apex SOAP Util (Unlocked)@0.3.0-1": "04tP30000014EwfIAE",
+    "Lightweight - Agent Util (Unlocked)": "0HoP300000000xhKAA",
+    "Lightweight - Agent Util (Unlocked)@0.4.0-1": "04tP30000016tNpIAI",
+    "Lightweight - Agent Util": "0HoP3000000010vKAA",
+    "Lightweight - Agent Util@0.4.0-1": "04tP30000016tMDIAY"
+  }
+}
