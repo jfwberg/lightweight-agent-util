@@ -30,9 +30,9 @@ The full detailed configuration instructions and use of the UI can be found here
 | Info | Value | ||
 |---|---|---|---|
 |Name|Lightweight - Agent Util||
-|Version|0.4.0||
-|**Managed** | `sf package install --wait 30 --security-type AllUsers --package 04tP30000016tMDIAY` | [Install in production](https://login.salesforce.com/packaging/installPackage.apexp?mgd=true&p0=04tP30000016tMDIAY) | [Install in Sandbox](https://test.salesforce.com/packaging/installPackage.apexp?mgd=true&p0=04tP30000016tMDIAY)|
-|**Unlocked**| `sf package install --wait 30 --security-type AllUsers --package 04tP30000016tNpIAI` | [Install in production](https://login.salesforce.com/packaging/installPackage.apexp?p0=04tP30000016tNpIAI)          | [Install in Sandbox](https://test.salesforce.com/packaging/installPackage.apexp?p0=04tP30000016tNpIAI)|
+|Version|0.5.0||
+|**Managed** | `sf package install --wait 30 --security-type AllUsers --package 04tP30000016z8HIAQ` | [Install in production](https://login.salesforce.com/packaging/installPackage.apexp?mgd=true&p0=04tP30000016z8HIAQ) | [Install in Sandbox](https://test.salesforce.com/packaging/installPackage.apexp?mgd=true&p0=04tP30000016z8HIAQ)|
+|**Unlocked**| `sf package install --wait 30 --security-type AllUsers --package 04tP30000016zD7IAI` | [Install in production](https://login.salesforce.com/packaging/installPackage.apexp?p0=04tP30000016zD7IAI)          | [Install in Sandbox](https://test.salesforce.com/packaging/installPackage.apexp?p0=04tP30000016zD7IAI)|
 
 ## UI Tools
 Besides Apex Classes this utillity contains a set of UI tools to setup the Agent Api connected App and Named Credentials with just a few clicks. Once set up, the utility contains a UI for the API calls that is some sort of mini version of Postman.

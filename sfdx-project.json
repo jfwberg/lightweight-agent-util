@@ -1,8 +1,8 @@
 {
   "packageDirectories": [
     {
-      "versionName": "v63.0 - 0.4",
-      "versionNumber": "0.4.0.NEXT",
+      "versionName": "v63.0 - 0.5",
+      "versionNumber": "0.5.0.NEXT",
       "path": "force-app/package",
       "default": true,
       "package": "Lightweight - Agent Util",
@@ -15,8 +15,8 @@
       ]
     },
     {
-      "versionName": "v63.0 - 0.4",
-      "versionNumber": "0.4.0.NEXT",
+      "versionName": "v63.0 - 0.5",
+      "versionNumber": "0.5.0.NEXT",
       "path": "force-app/package",
       "default": false,
       "package": "Lightweight - Agent Util (Unlocked)",
@@ -38,6 +38,8 @@
     "Lightweight - Agent Util (Unlocked)": "0HoP300000000xhKAA",
     "Lightweight - Agent Util (Unlocked)@0.4.0-1": "04tP30000016tNpIAI",
     "Lightweight - Agent Util": "0HoP3000000010vKAA",
-    "Lightweight - Agent Util@0.4.0-1": "04tP30000016tMDIAY"
+    "Lightweight - Agent Util@0.4.0-1": "04tP30000016tMDIAY",
+    "Lightweight - Agent Util@0.5.0-1": "04tP30000016z8HIAQ",
+    "Lightweight - Agent Util (Unlocked)@0.5.0-1": "04tP30000016zD7IAI"
   }
 }

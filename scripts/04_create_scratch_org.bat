@@ -14,5 +14,11 @@ sf org:create:scratch --definition-file config\project-scratch-def.json --alias 
 REM Install the package dependencies
 sf package:install -p %dependencyOne% --target-org %alias% --wait 30
 
+REM Push Code
+sf project:deploy:start --target-org "%alias%"
+
 REM Assign permission set
-sf org assign permset --name "%permSetName%"
+sf org assign permset --name "%permSetName%" --target-org "%alias%"
+
+REM Open Org
+sf org open --target-org "%alias%"

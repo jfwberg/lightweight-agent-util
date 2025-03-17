@@ -122,14 +122,9 @@ public with sharing class AgentUtilSetupLwcCtrl{
     @AuraEnabled
     public static Map<String,Object> getMetadataForUpdate(String appName){
         try{
-
-            // External Credential details
-            ConnectApi.ExternalCredential aaExtCred;
-            ConnectApi.ExternalCredential hoExtCred;
-
             // External credential parameter mappings
-            Map<String,String> aaExtCredParameterNameValueMap = new Map<String,String>();
-            Map<String,String> hoExtCredParameterNameValueMap = new Map<String,String>();
+            Map<String,String> aaExtCredParameterNameValueMap = Metadata.getExternalCredentialParameterValues(appName + apiconstant.val_nc_suffix_agent_api);
+            Map<String,String> hoExtCredParameterNameValueMap = Metadata.getExternalCredentialParameterValues(appName + ApiConstant.VAL_NC_SUFFIX_SFDC_API);
 
             // Get certificate we use to sign the JWT
             String signingCertificate        = Metadata.getCertificateContent(appName);
@@ -141,39 +136,9 @@ public with sharing class AgentUtilSetupLwcCtrl{
             String aaConnectedAppCertificate = Metadata.getConnectedAppCertificate(appName + apiconstant.val_nc_suffix_agent_api);
             String hoConnectedAppCertificate = Metadata.getConnectedAppCertificate(appName + ApiConstant.VAL_NC_SUFFIX_SFDC_API);
 
-            // Catch any errors in case a named credential does not exist
-            try{
-
-                // Get the named credentials
-                aaExtCred = Test.isRunningTest() ? new ConnectApi.ExternalCredential() : ConnectApi.NamedCredentials.getExternalCredential(appName + apiconstant.val_nc_suffix_agent_api);
-                hoExtCred = Test.isRunningTest() ? new ConnectApi.ExternalCredential() : ConnectApi.NamedCredentials.getExternalCredential(appName + ApiConstant.VAL_NC_SUFFIX_SFDC_API);
-                if(Test.isRunningTest()){
-                    aaExtCred.parameters = new ConnectApi.ExternalCredentialParameter[]{};
-                    hoExtCred.parameters = new ConnectApi.ExternalCredentialParameter[]{};
-                }
-
-                for(ConnectApi.ExternalCredentialParameter param : aaExtCred.parameters){
-                    aaExtCredParameterNameValueMap.put(
-                        param.parameterName,
-                        param.parameterValue
-                    );
-                }
-
-                for(ConnectApi.ExternalCredentialParameter param : hoExtCred.parameters){
-                    hoExtCredParameterNameValueMap.put(
-                        param.parameterName,
-                        param.parameterValue
-                    );
-                }
-            }catch(ConnectApi.ConnectApiException e){
-                if(!e.getMessage().toLowerCase().contains('the developername parameter value doesn\'t exist')){
-                    throw new StringException(e.getMessage());
-                }
-            }
-
             // Inidcators of the metadata was created for this app name
             Boolean  connectedAppFound       = String.isNotBlank(aaConnectedAppCertificate);
-            Boolean  namedCredentialFound    = aaExtCred != null && hoExtCred != null;
+            Boolean  namedCredentialFound    = aaExtCredParameterNameValueMap.size() > 0;
 
             // To display the current related user, get the user from the permission set
             if(connectedAppFound){
